@@ -100,11 +100,11 @@ class LogStash::Outputs::TcpEvam < LogStash::Outputs::Base
 
     @codec.on_event do |event, payload|
       begin
-        puts "payload: " + payload
+        # puts "payload: " + payload
         actor_id = payload.split(",")[1].to_i
-        puts "actor_id: " + actor_id
+        # puts "actor_id: " + actor_id.to_s
         node_id = actor_id % @sockets.length
-        puts "node_id: " + node_id
+        # puts "node_id: " + node_id.to_s
         write_to_tcp(payload, @sockets[node_id])
 
         # if (actor_id == "001")
