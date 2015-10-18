@@ -1,0 +1,3 @@
+{ "city" : {"actor" : "001"}, "foo" : "s31", "bar" : {"baz" : ["a","b"]} }
+{ "city" : {"actor" : "016"}, "foo" : "s32", "bar" : {"baz" : ["a","c"]} }
+{ "city" : {"actor" : "014"}, "foo" : "s32", "bar" : {"baz" : ["a","c"]} }
