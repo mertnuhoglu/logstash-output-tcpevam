@@ -16,7 +16,7 @@ Note that, this plugin is designed to be used together with logstash-codec-evam 
 
 You can find some example logstash `conf` files to run under `examples/` directory. 
 
-- `evam10.conf` is for testing a json input data using EvamListener.jar service
+- `evam11.conf` is for testing a json input data using EvamListener.jar service
 
 ### Updating Paths
 
@@ -70,11 +70,11 @@ The example `conf` files expect that an elasticsearch server is running on local
 
 ### Running Logstash Example conf Files
 
-Now, you can run `evam10.conf` to test the plugin.
+Now, you can run `evam11.conf` to test the plugin.
 
 Run the following commands from the root directory of Logstash:
 
-	bin/logstash -f /path/to/evam10.conf
+	bin/logstash -f /path/to/evam11.conf
 
 After a while, you will see "Logstash startup completed" message. Now, open the example input data files (`json.log`), make some changes, and save the files. 
 
