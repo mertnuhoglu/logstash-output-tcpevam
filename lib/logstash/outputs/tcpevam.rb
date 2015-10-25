@@ -15,12 +15,13 @@ class LogStash::Outputs::TcpEvam < LogStash::Outputs::Base
 
   default :codec, "json"
 
-  config :hosts, :validate => :array, :required => true
-
+  # config :hosts, :validate => :array, :required => true
   # When mode is `server`, the address to listen on.
   # When mode is `client`, the address to connect to.
   # config :host, :validate => :string, :required => true
   # config :host2, :validate => :string, :required => true
+  config :dependent_jar_path, :validate => :path, :required => true
+  config :filelistener, :validate => :path, :required => true
 
   # When mode is `server`, the port to listen on.
   # When mode is `client`, the port to connect to.
@@ -77,19 +78,28 @@ class LogStash::Outputs::TcpEvam < LogStash::Outputs::Base
   def register
     require "socket"
     require "stud/try"
+
+    # jar_files = ['netty-3.10.0.Final.jar', 'log4j-1.2.17.jar', 'listener-tokenizer-4.0.4.jar', 'listener-parser-4.0.4.jar', 'legacy-listener-4.0.4.jar', 'guava-16.0.1.jar', 'commons-utils-4.0.4.jar', 'commons-sdk-4.0.4.jar', 'commons-pool-1.5.6.jar', 'commons-lang-2.6.jar', 'commons-event-sender-4.0.4.jar', 'commons-collections-3.1.jar', 'commons-cli-1.2.jar']
+    # jar_files.each(|jar| require File.join(@dependent_jar_path, jar) )
+    Dir["#{@dependent_jar_path}/*.jar"].each {|file| require file }
+
     begin
       @sockets = Hash.new
-      hosts_arr = @hosts.each_with_index { |k, i|
-        host = k.split(":")[0]
-        port = k.split(":")[1]
-        @sockets[i] = connect(host, port)
-      }
+
+      # hosts_arr = @hosts.each_with_index { |k, i|
+      #   host = k.split(":")[0]
+      #   port = k.split(":")[1]
+      #   @sockets[i] = connect(host, port)
+      # }
+
       # @sockets["0"] = connect(@host, @port)
       # @sockets["1"] = connect(@host2, @port2)
       puts "socket created"
     rescue => e
-      @logger.warn("tcp output exception", :host => @hosts,
+      @logger.warn("tcp output exception",
                    :exception => e, :backtrace => e.backtrace)
+      # @logger.warn("tcp output exception", :host => @hosts,
+      #              :exception => e, :backtrace => e.backtrace)
       # @logger.warn("tcp output exception", :host => @host, :port => @port,
       #              :exception => e, :backtrace => e.backtrace)
       # @logger.warn("tcp output exception", :host => @host2, :port => @port2,
@@ -103,9 +113,11 @@ class LogStash::Outputs::TcpEvam < LogStash::Outputs::Base
         # puts "payload: " + payload
         actor_id = payload.split(",")[1].to_i
         # puts "actor_id: " + actor_id.to_s
-        node_id = actor_id % @sockets.length
         # puts "node_id: " + node_id.to_s
-        write_to_tcp(payload, @sockets[node_id])
+
+        # node_id = actor_id % @sockets.length
+        # write_to_tcp(payload, @sockets[node_id])
+        write_to_evam(actor_id, payload)
 
         # if (actor_id == "001")
           # client_socket = write_to_tcp(client_socket, payload, @host, @port)
@@ -123,6 +135,17 @@ class LogStash::Outputs::TcpEvam < LogStash::Outputs::Base
         retry
       end
     end
+  end
+
+  def write_to_evam(actor_id, payload)
+    props = java.util.Properties.new
+    props.load(java.io.FileInputStream.new(@filelistener))
+    evam = com.intelllica.evam.client.EventSenderManager.getInstance()
+    evam.init(props)
+    evam.checkConnections()
+    # event = com.intellica.model.Event.new("event02", 12, "test_event_ruby");
+    # evam.sendEvent(event)
+    evam.java_send :sendEvent, [java.lang.Long, java.lang.String], java.lang.Long.valueOf(actor_id), payload
   end
 
   def write_to_tcp(payload, client_socket)

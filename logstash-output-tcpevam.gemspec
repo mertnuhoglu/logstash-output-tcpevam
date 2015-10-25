@@ -26,5 +26,8 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'stud'
 
   s.add_development_dependency 'logstash-devutils'
+  # Jar dependencies
+  # s.requirements << "jar 'com.google.guava', '16.0.1'"
+  # s.add_runtime_dependency 'jar-dependencies'
 end
 
