@@ -15,13 +15,13 @@ class LogStash::Outputs::TcpEvam < LogStash::Outputs::Base
 
   default :codec, "json"
 
-  # config :hosts, :validate => :array, :required => true
+  config :hosts, :validate => :array, :required => true
   # When mode is `server`, the address to listen on.
   # When mode is `client`, the address to connect to.
   # config :host, :validate => :string, :required => true
   # config :host2, :validate => :string, :required => true
   config :dependent_jar_path, :validate => :path, :required => true
-  config :filelistener, :validate => :path, :required => true
+  # config :filelistener, :validate => :path, :required => true
 
   # When mode is `server`, the port to listen on.
   # When mode is `client`, the port to connect to.
@@ -139,7 +139,24 @@ class LogStash::Outputs::TcpEvam < LogStash::Outputs::Base
 
   def write_to_evam(actor_id, payload)
     props = java.util.Properties.new
-    props.load(java.io.FileInputStream.new(@filelistener))
+    props.setProperty("numServers", "1")
+    props.setProperty("pollInterval", "10")
+    props.setProperty("engineMonitorInterval", "10")
+    props.setProperty("warningLevelThreshold", "30000")
+    props.setProperty("warningLevelWaitTime", "15")
+    props.setProperty("errorLevelThreshold", "50000")
+    props.setProperty("errorLevelWaitTime", "30")
+    props.setProperty("fatalLevelThreshold", "75000")
+    props.setProperty("fatalLevelWaitTime", "60")
+    props.setProperty("endOfResponseDelimiter", "END_OF_RESPONSE~\n")
+    props.setProperty("eventSenderPoolSize", "3")
+    @hosts.each_with_index { |k, i|
+      host = k.split(":")[0]
+      port = k.split(":")[1]
+      props.setProperty("host.#{i}", host)
+      props.setProperty("port.#{i}", port)
+    }
+    # props.load(java.io.FileInputStream.new(@filelistener))
     evam = com.intelllica.evam.client.EventSenderManager.getInstance()
     evam.init(props)
     evam.checkConnections()

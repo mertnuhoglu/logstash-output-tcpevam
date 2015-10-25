@@ -32,7 +32,7 @@ You need to define the absolute path to this properties file inside the `conf` f
 
   tcpevam {
 		dependent_jar_path => '/Users/mertnuhoglu/projects/ruby/logstash_plugins/logstash-output-tcpevam/jars'
-		filelistener => '/Users/mertnuhoglu/projects/ruby/logstash_plugins/logstash-output-tcpevam/examples/fileListenerAgent0.properties'
+		hosts => [ "localhost:8888", "localhost:8889" ]
 		codec => evam{
 			scenario => 'scenario_type'
 			event => 'event_type'
@@ -40,12 +40,9 @@ You need to define the absolute path to this properties file inside the `conf` f
 		}
   } 
 
-The properties file of EvamListener allows you to define the ip address and hosts of multiple Evam server instances.
+## Evam Server Host Parameters
 
-	host.0=localhost
-	port.0=4321
-
-If you have more than one server, than define those like host.1, host.2.
+You need to specify the addresses and ports of Evam Servers using `hosts` parameter as show in the above example.
 
 ## Dependent Jar Files
 
