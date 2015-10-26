@@ -139,7 +139,7 @@ class LogStash::Outputs::TcpEvam < LogStash::Outputs::Base
 
   def write_to_evam(actor_id, payload)
     props = java.util.Properties.new
-    props.setProperty("numServers", "1")
+    props.setProperty("numServers", @hosts.length.to_s)
     props.setProperty("pollInterval", "10")
     props.setProperty("engineMonitorInterval", "10")
     props.setProperty("warningLevelThreshold", "30000")
